@@ -1,0 +1,112 @@
+:root {
+  color-scheme: dark;
+  --bg: #131722;
+  --panel: #1e2432;
+  --accent: #8bd3ff;
+  --text: #ecf2ff;
+  --good: #9ce08f;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+  background: radial-gradient(circle at top, #242f48, var(--bg));
+  color: var(--text);
+}
+
+.game {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+header {
+  text-align: center;
+}
+
+.subtitle {
+  margin-top: -0.5rem;
+  color: #b2c5e7;
+}
+
+.status-panel {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.5rem;
+  background: var(--panel);
+  border: 1px solid #303a53;
+  border-radius: 8px;
+  padding: 0.75rem;
+}
+
+.scene {
+  margin-top: 1rem;
+  background: var(--panel);
+  border: 1px solid #303a53;
+  border-radius: 8px;
+  padding: 0.75rem;
+}
+
+.room-description {
+  margin-bottom: 0.75rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+button {
+  border: 1px solid #4d5a7e;
+  background: #2b3550;
+  color: var(--text);
+  padding: 0.45rem 0.7rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+button:hover {
+  border-color: var(--accent);
+}
+
+.inventory {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  min-height: 38px;
+  padding: 0.6rem;
+  background: var(--panel);
+  border-radius: 8px;
+  border: 1px solid #303a53;
+}
+
+.item {
+  border: 1px solid #536288;
+  border-radius: 999px;
+  padding: 0.2rem 0.7rem;
+  background: #2e3b5c;
+}
+
+.log {
+  background: #111827;
+  border-radius: 8px;
+  border: 1px solid #2f3a52;
+  padding: 0.7rem;
+  min-height: 120px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.log-entry {
+  margin: 0 0 0.5rem;
+}
+
+.victory {
+  color: var(--good);
+  font-weight: 700;
+}
