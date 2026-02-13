@@ -16,7 +16,28 @@ const rooms = {
   square: {
     name: "Town Square",
     description:
-      "Fog hangs over silent cobblestones. The old clocktower looms ahead, and a dark workshop sits to the east.",
+      "The moonlight hits the cobblestones. Click hotspots like an old LucasArts scene.",
+    sceneClass: "scene-square",
+    objects: ["clocktower", "fountain"],
+    hotspots: [
+      {
+        label: "Workshop",
+        type: "move",
+        target: "workshop",
+        style: "left: 8%; top: 48%; width: 20%; height: 18%;",
+      },
+      {
+        label: "Clocktower",
+        type: "move",
+        target: "clocktower",
+        style: "left: 56%; top: 16%; width: 18%; height: 54%;",
+      },
+      {
+        label: "Fountain",
+        type: "inspectFountain",
+        style: "left: 10%; top: 64%; width: 20%; height: 18%;",
+      },
+    ],
     actions: [
       { label: "Go to workshop", type: "move", target: "workshop" },
       { label: "Approach clocktower door", type: "move", target: "clocktower" },
@@ -25,8 +46,27 @@ const rooms = {
   },
   workshop: {
     name: "Abandoned Workshop",
-    description:
-      "Dusty benches line the walls. A rusty crowbar and a compact battery rest on a table.",
+    description: "Dusty tools and a bench. Useful items still remain.",
+    sceneClass: "scene-workshop",
+    objects: ["workbench", "crowbar", "battery"],
+    hotspots: [
+      {
+        label: "Square",
+        type: "move",
+        target: "square",
+        style: "left: 2%; top: 42%; width: 18%; height: 36%;",
+      },
+      {
+        label: "Crowbar",
+        type: "takeCrowbar",
+        style: "left: 40%; top: 54%; width: 13%; height: 11%;",
+      },
+      {
+        label: "Battery",
+        type: "takeBattery",
+        style: "left: 56%; top: 51%; width: 12%; height: 16%;",
+      },
+    ],
     actions: [
       { label: "Return to square", type: "move", target: "square" },
       { label: "Take crowbar", type: "takeCrowbar" },
@@ -35,8 +75,42 @@ const rooms = {
   },
   clocktower: {
     name: "Clocktower Entrance",
-    description:
-      "An access panel beside the door is sealed shut. A locked chest sits under the stairs.",
+    description: "A sealed panel, a stubborn chest, and a locked door.",
+    sceneClass: "scene-clocktower",
+    objects: ["clocktower", "panel", "chest", "key"],
+    hotspots: [
+      {
+        label: "Square",
+        type: "move",
+        target: "square",
+        style: "left: 2%; top: 42%; width: 17%; height: 35%;",
+      },
+      {
+        label: "Panel",
+        type: "openPanel",
+        style: "left: 23%; top: 48%; width: 10%; height: 20%;",
+      },
+      {
+        label: "Battery Slot",
+        type: "insertBattery",
+        style: "left: 35%; top: 49%; width: 16%; height: 19%;",
+      },
+      {
+        label: "Chest",
+        type: "openChest",
+        style: "left: 60%; top: 66%; width: 18%; height: 17%;",
+      },
+      {
+        label: "Take Key",
+        type: "takeKey",
+        style: "left: 65%; top: 62%; width: 13%; height: 12%;",
+      },
+      {
+        label: "Use Key",
+        type: "useKey",
+        style: "left: 56%; top: 18%; width: 18%; height: 46%;",
+      },
+    ],
     actions: [
       { label: "Return to square", type: "move", target: "square" },
       { label: "Pry open access panel", type: "openPanel" },
@@ -91,7 +165,7 @@ function executeAction(type, target) {
       state.room = target;
       break;
     case "inspectFountain":
-      log("You find nothing useful in the fountain but a few old coins.");
+      log("You find a few old coins, but no clues.");
       break;
     case "takeCrowbar":
       if (state.flags.crowbarTaken) {
@@ -118,7 +192,7 @@ function executeAction(type, target) {
         log("You need something to pry the panel open.");
       } else {
         state.flags.panelOpened = true;
-        log("With a loud screech, you pry open the panel.");
+        log("With a loud screech, the panel pops open.");
       }
       break;
     case "insertBattery":
@@ -130,7 +204,7 @@ function executeAction(type, target) {
         log("Power is already restored.");
       } else {
         state.flags.powerOn = true;
-        log("The tower lights flicker on. You hear a chest lock click nearby.");
+        log("The tower lights flicker on. A lock clicks nearby.");
       }
       break;
     case "openChest":
@@ -162,7 +236,7 @@ function executeAction(type, target) {
       } else {
         state.flags.gameWon = true;
         log(
-          "The key turns. The clocktower door swings open, and the town bells ring again. You win!",
+          "The key turns. The clocktower door opens, and the bells ring again. You win!",
           "victory"
         );
       }
@@ -174,15 +248,44 @@ function executeAction(type, target) {
   render();
 }
 
+function renderScene(room) {
+  const pixelScene = document.createElement("div");
+  pixelScene.className = `pixel-scene ${room.sceneClass}`;
+
+  room.objects.forEach((obj) => {
+    if (obj === "crowbar" && state.flags.crowbarTaken) return;
+    if (obj === "battery" && state.flags.batteryTaken) return;
+    if (obj === "key" && (!state.flags.chestOpen || state.flags.keyTaken)) return;
+
+    const piece = document.createElement("div");
+    piece.className = `pixel-object obj-${obj}`;
+    pixelScene.appendChild(piece);
+  });
+
+  room.hotspots.forEach((hotspotDef) => {
+    const hotspot = document.createElement("button");
+    hotspot.type = "button";
+    hotspot.className = "hotspot";
+    hotspot.textContent = hotspotDef.label;
+    hotspot.setAttribute("style", hotspotDef.style);
+    hotspot.addEventListener("click", () => executeAction(hotspotDef.type, hotspotDef.target));
+    pixelScene.appendChild(hotspot);
+  });
+
+  return pixelScene;
+}
+
 function render() {
   const room = rooms[state.room];
   locationNameEl.textContent = room.name;
-
   sceneEl.innerHTML = "";
+
   const description = document.createElement("p");
   description.className = "room-description";
   description.textContent = room.description;
   sceneEl.appendChild(description);
+
+  sceneEl.appendChild(renderScene(room));
 
   const actions = document.createElement("div");
   actions.className = "actions";
@@ -199,5 +302,6 @@ function render() {
   renderInventory();
 }
 
-log("You arrive at the deserted square. Find a way into the clocktower.");
+log("You arrive at the square. Point and click your way into the clocktower.");
 render();
+
